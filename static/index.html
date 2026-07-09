@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpaceX 指标 · 实时面板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0e14; --card: #141a24; --border: #232c3d;
+    --text: #e6edf3; --muted: #8b98a9; --up: #3fb950; --down: #f85149;
+    --accent: #58a6ff; --warn: #d29922;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text);
+         font: 14px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; padding: 20px; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .sub { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card .label { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+  .card .value { font-size: 26px; font-weight: 700; }
+  .card .extra { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .up { color: var(--up); } .down { color: var(--down); } .warn { color: var(--warn); }
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+  .chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; height: 280px; }
+  .chart-box h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+  .zoom-hint { color: var(--muted); font-size: 10px; font-weight: 400; margin-left: 6px; opacity: 0.7; }
+  .zoom-reset { float: right; background: #1c2330; border: 1px solid var(--border); color: var(--muted); font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer; }
+  .zoom-reset:hover { color: var(--text); }
+  .chart-box canvas { max-height: 220px; }
+  .narrative { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .nar-head { font-size: 14px; color: var(--text); font-weight: 600; margin-bottom: 12px; }
+  .nar-head span { color: var(--muted); font-weight: 400; font-size: 11px; }
+  .nar-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 22px; }
+  @media (max-width: 900px) { .nar-grid { grid-template-columns: 1fr; } }
+  .nar-bar-label { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+  .nar-bar { height: 26px; display: flex; border-radius: 4px; overflow: hidden; background: #10151f; }
+  .nar-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; color: #0b0e14; font-weight: 600; white-space: nowrap; overflow: hidden; }
+  .nar-legend { display: flex; gap: 14px; margin-top: 10px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+  .nar-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  .nar-stats { display: flex; flex-direction: column; justify-content: center; gap: 9px; }
+  .nar-stat { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 7px; }
+  .nar-stat .k { font-size: 12px; color: var(--muted); }
+  .nar-stat .v { font-size: 17px; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; background: var(--card);
+          border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid var(--border); font-size: 13px; }
+  th { color: var(--muted); font-weight: 500; background: #10151f; }
+  td:first-child, th:first-child, td:nth-child(2), th:nth-child(2) { text-align: left; }
+  .group-row td { background: #10151f; color: var(--accent); font-weight: 600; text-align: left; font-size: 12px; }
+  th.reason-col, td.reason { text-align: left; }
+  td.reason { color: var(--muted); font-size: 12px; line-height: 1.45; max-width: 320px; white-space: normal; }
+  .foot { color: var(--muted); font-size: 11px; margin-top: 14px; line-height: 1.8; }
+  #status { font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>🚀 SpaceX 指标 · 实时面板</h1>
+<div class="sub">SPCX 上市日 2026-06-12 · 数据源 Yahoo 实时端点 · <span id="delay">行情延迟 —</span> · 每15秒自动刷新 · <span id="status">加载中…</span></div>
+
+<div class="cards">
+  <div class="card"><div class="label">SPCX 现价（IPO 价 $135）</div>
+    <div class="value" id="spcx-price">—</div><div class="extra" id="spcx-extra">—</div></div>
+  <div class="card"><div class="label">模型合理价（同业+大盘反推）</div>
+    <div class="value" id="fair-price">—</div><div class="extra" id="fair-extra">—</div></div>
+  <div class="card"><div class="label">综合情绪指标（0–100）</div>
+    <div class="value" id="senti-score">—</div><div class="extra" id="senti-extra">—</div></div>
+  <div class="card"><div class="label">DXYZ 对 NAV 溢价</div>
+    <div class="value" id="dxyz-prem">—</div><div class="extra" id="dxyz-extra">—</div></div>
+  <div class="card"><div class="label">GOOGL 所持 SpaceX 价值（~5%）</div>
+    <div class="value" id="googl-stake">—</div><div class="extra" id="googl-extra">—</div></div>
+  <div class="card"><div class="label">情绪篮子 β剥离超额（今日）</div>
+    <div class="value" id="basket-resid">—</div><div class="extra" id="basket-extra">—</div></div>
+</div>
+
+<div class="charts">
+  <div class="chart-box"><h3>SPCX 价格走势 <span class="zoom-hint">滚轮缩放 · 拖拽平移 · 仅交易时段</span><button class="zoom-reset" onclick="chartSpcx.resetZoom()">重置</button></h3><canvas id="chart-spcx"></canvas></div>
+  <div class="chart-box"><h3>综合情绪指标走势 <span class="zoom-hint">滚轮缩放 · 拖拽平移 · 仅交易时段</span><button class="zoom-reset" onclick="chartSenti.resetZoom()">重置</button></h3><canvas id="chart-senti"></canvas></div>
+</div>
+
+<div class="narrative">
+  <div class="nar-head">算力叙事强度 · 基本面快照 <span id="nar-asof"></span></div>
+  <div class="nar-grid">
+    <div class="nar-left">
+      <div class="nar-bar-label">2025 实际收入 $18.7B（分部构成）</div>
+      <div class="nar-bar" id="nar-bar-rev"></div>
+      <div class="nar-bar-label" id="nar-comp-label">已签算力合同（前瞻年化）</div>
+      <div class="nar-bar" id="nar-bar-comp"></div>
+      <div class="nar-legend" id="nar-legend"></div>
+    </div>
+    <div class="nar-stats" id="nar-stats"></div>
+  </div>
+</div>
+
+<table id="tbl">
+  <thead><tr><th>代码</th><th>名称</th><th>现价</th><th>日涨跌</th><th>市值</th><th>SpaceX 敞口</th><th class="reason-col">绑定原因</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<div class="foot">
+  分组说明：<b>core</b>=SpaceX 本尊 · <b>holders</b>=持有 SpaceX 股权的代理（敞口为官方/媒体披露值，附截至日期）·
+  <b>compute</b>=算力供应链（GPU/服务器/储能/散热/芯片，仅展示不进情绪计算）· <b>compute_rival</b>=算力竞品（GPU 云）·
+  <b>basket</b>=情绪篮子（不持股，纯光环交易）· <b>ecosystem</b>=生态受益 · <b>benchmark</b>=基准。<br>
+  指标口径：综合情绪 = mean(DXYZ溢价z, 篮子β剥离残差z, 代理基金成交量z) 经正态CDF映射至0-100；
+  DXYZ NAV $24.56（2026-03-31 披露，下次披露后需更新配置）。<br>
+  模型合理价 = IPO询价 $135 ×(1 + β_spcx·大盘涨跌 + 0.3·板块β剥离超额)，β_spcx 由篮子β向1收缩并封顶1.5；独立于 SPCX 实际成交价，用于判断高估/低估（含主观参数假设）。本面板仅供研究，不构成投资建议。
+</div>
+
+<script>
+const GROUP_NAMES = { core: "── SpaceX 本尊 ──", holders: "── 股权关联（持有 SpaceX）──",
+  compute: "── 算力供应链（Colossus 超算 + 太空数据中心）──",
+  compute_rival: "── 算力竞品（SpaceX 出租算力的对手）──",
+  basket: "── 情绪篮子（光环交易）──", ecosystem: "── 生态受益 ──", benchmark: "── 基准 ──" };
+
+let chartSpcx, chartSenti;
+
+function fmtPct(v, digits = 2) {
+  if (v === null || v === undefined) return "—";
+  const s = (v * 100).toFixed(digits) + "%";
+  return v >= 0 ? "+" + s : s;
+}
+function pctClass(v) { return v === null || v === undefined ? "" : (v >= 0 ? "up" : "down"); }
+function fmtMcap(v) {
+  if (!v) return "—";
+  if (v >= 1e12) return "$" + (v / 1e12).toFixed(2) + "T";
+  if (v >= 1e9) return "$" + (v / 1e9).toFixed(1) + "B";
+  return "$" + (v / 1e6).toFixed(0) + "M";
+}
+function fmtZ(z) { return z === null || z === undefined ? "z=—" : "z=" + z.toFixed(2); }
+
+function mkChart(ctx, label, color, fmt, yOpts = {}) {
+  return new Chart(ctx, {
+    type: "line",
+    data: { labels: [], datasets: [{ label, data: [], borderColor: color,
+      backgroundColor: color + "22", fill: true, pointRadius: 0, pointHoverRadius: 4,
+      pointHoverBackgroundColor: color, tension: 0.25, borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false },
+        tooltip: { displayColors: false, padding: 8,
+          callbacks: { label: (c) => fmt(c.parsed.y) } },
+        zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "x" },
+                pan: { enabled: true, mode: "x" } } },
+      scales: { x: { ticks: { color: "#8b98a9", maxTicksLimit: 8 }, grid: { color: "#232c3d" } },
+                y: { ticks: { color: "#8b98a9" }, grid: { color: "#232c3d" }, ...yOpts } } }
+  });
+}
+
+function renderNarrative(n) {
+  document.getElementById("nar-asof").textContent = "· 来源 " + n.asof;
+  const colors = ["#3fb950", "#58a6ff", "#d29922"];
+  const maxv = Math.max(n.revenue_total, n.compute_annualized);
+  const revBar = document.getElementById("nar-bar-rev");
+  revBar.style.width = (n.revenue_total / maxv * 100) + "%";
+  revBar.innerHTML = n.segments.map((sg, i) =>
+    `<div class="nar-seg" style="width:${sg.rev / n.revenue_total * 100}%;background:${colors[i]}">${sg.rev >= 3 ? "$" + sg.rev + "B" : ""}</div>`).join("");
+  const compBar = document.getElementById("nar-bar-comp");
+  compBar.style.width = (n.compute_annualized / maxv * 100) + "%";
+  compBar.innerHTML = `<div class="nar-seg" style="width:100%;background:#f85149">$${n.compute_annualized}B / 年</div>`;
+  document.getElementById("nar-comp-label").textContent =
+    `已签算力合同（前瞻年化）· ${n.compute_detail}`;
+  document.getElementById("nar-legend").innerHTML =
+    n.segments.map((sg, i) => `<span><i style="background:${colors[i]}"></i>${sg.name} $${sg.rev}B</span>`).join("") +
+    `<span><i style="background:#f85149"></i>已签算力合同（年化）</span>`;
+  document.getElementById("nar-stats").innerHTML = [
+    ["已签算力合同 ÷ 全公司2025收入", (n.compute_vs_total * 100).toFixed(0) + "%", "down"],
+    ["已签算力合同 ÷ 2025 AI实际收入", n.compute_vs_ai.toFixed(1) + "×", "down"],
+    ["AI/xAI 占2025收入（且经营亏 $6.4B）", (n.ai_share * 100).toFixed(0) + "%", "warn"],
+    ["当前市销率 P/S（市值 ÷ 2025收入）", n.ps_ratio ? n.ps_ratio.toFixed(0) + "×" : "—", "warn"],
+  ].map(([k, v, c]) => `<div class="nar-stat"><span class="k">${k}</span><span class="v ${c}">${v}</span></div>`).join("");
+}
+
+function render(payload) {
+  const d = payload.data, s = payload.series;
+  if (d.narrative) renderNarrative(d.narrative);
+
+  const dd = d.data_delay_sec;
+  const delayEl = document.getElementById("delay");
+  if (dd == null) { delayEl.textContent = "行情延迟 —"; delayEl.className = "warn"; }
+  else if (dd < 0 || dd > 300) { delayEl.textContent = "休市 / 盘后"; delayEl.className = "warn"; }
+  else { delayEl.textContent = `行情延迟 ~${dd}秒`; delayEl.className = dd < 60 ? "up" : "warn"; }
+
+  const spcx = d.spcx;
+  document.getElementById("spcx-price").textContent = spcx.last ? "$" + spcx.last.toFixed(2) : "—";
+  document.getElementById("spcx-price").className = "value " + pctClass(spcx.vs_ipo);
+  document.getElementById("spcx-extra").textContent =
+    "较发行价 " + fmtPct(spcx.vs_ipo) + " · 市值 " + fmtMcap(spcx.mcap);
+
+  const fv = d.fair_value;
+  const fairEl = document.getElementById("fair-price");
+  fairEl.textContent = fv && fv.price ? "$" + fv.price.toFixed(2) : "—";
+  const vs = fv ? fv.vs_last : null;  // 现价 ÷ 合理价 − 1：>0 高估，<0 低估
+  fairEl.className = "value " + (vs == null ? "" : vs > 0.05 ? "down" : vs < -0.05 ? "up" : "warn");
+  document.getElementById("fair-extra").textContent = fv
+    ? `锚 IPO $${fv.anchor} · 大盘 ${fmtPct(fv.mkt_contrib)} · 板块 ${fmtPct(fv.sector_contrib)}` +
+      (vs != null ? ` · 现价${vs > 0 ? "高估" : "低估"} ${Math.abs(vs * 100).toFixed(0)}%` : "")
+    : "—";
+
+  const sc = d.sentiment.score;
+  const el = document.getElementById("senti-score");
+  el.textContent = sc ?? "—";
+  el.className = "value " + (sc === null ? "" : sc >= 70 ? "down" : sc <= 30 ? "up" : "warn");
+  const c = d.sentiment.components;
+  document.getElementById("senti-extra").textContent =
+    `溢价${fmtZ(c.premium_z)} · 残差${fmtZ(c.basket_residual_z)} · 关注${fmtZ(c.attention_z)}（高=过热）`;
+
+  document.getElementById("dxyz-prem").textContent = fmtPct(d.dxyz.premium, 1);
+  document.getElementById("dxyz-prem").className = "value " + (d.dxyz.premium > 0.5 ? "down" : "warn");
+  document.getElementById("dxyz-extra").textContent =
+    `NAV $${d.dxyz.nav}（${d.dxyz.nav_asof}）· ${fmtZ(d.dxyz.premium_z)}`;
+
+  document.getElementById("googl-stake").textContent = fmtMcap(d.googl.stake_value);
+  document.getElementById("googl-extra").textContent =
+    "占 Alphabet 市值 " + fmtPct(d.googl.pct_of_googl, 1);
+
+  const br = d.basket.residual_today;
+  document.getElementById("basket-resid").textContent = fmtPct(br);
+  document.getElementById("basket-resid").className = "value " + pctClass(br);
+  document.getElementById("basket-extra").textContent =
+    "ASTS/RKLB/RDW/SATS/SPCE/LUNR/PL 剔除大盘后 · " + fmtZ(d.basket.residual_z);
+
+  // 表格
+  const tbody = document.querySelector("#tbl tbody");
+  tbody.innerHTML = "";
+  let lastGroup = null;
+  for (const row of d.table) {
+    if (row.group !== lastGroup) {
+      lastGroup = row.group;
+      const tr = document.createElement("tr");
+      tr.className = "group-row";
+      tr.innerHTML = `<td colspan="7">${GROUP_NAMES[row.group] || row.group}</td>`;
+      tbody.appendChild(tr);
+    }
+    const exp = row.exposure_pct !== null && row.exposure_pct !== undefined
+      ? (row.exposure_pct * 100).toFixed(1) + "%" + (row.exposure_asof ? ` (${row.exposure_asof})` : "")
+      : (row.exposure_note || "—");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><b>${row.ticker}</b></td><td>${row.name}</td>
+      <td>${row.last ? "$" + row.last.toFixed(2) : "—"}</td>
+      <td class="${pctClass(row.chg)}">${fmtPct(row.chg)}</td>
+      <td>${fmtMcap(row.mcap)}</td>
+      <td title="${row.exposure_note || ""}">${exp}</td>
+      <td class="reason">${row.bind_reason || "—"}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  // 图表
+  const labels = s.ts.map(t => {
+    const dt = new Date(t * 1000);
+    return (dt.getMonth() + 1) + "/" + dt.getDate() + " " +
+      dt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  });
+  const spcxStart = Math.max(0, s.spcx.findIndex(v => v != null));  // 跳过上市前的空段
+  chartSpcx.data.labels = labels.slice(spcxStart);
+  chartSpcx.data.datasets[0].data = s.spcx.slice(spcxStart);
+  chartSpcx.update();
+  chartSenti.data.labels = labels;
+  chartSenti.data.datasets[0].data = s.sentiment;
+  chartSenti.update();
+
+  const now = new Date();
+  document.getElementById("status").textContent =
+    "更新于 " + now.toLocaleTimeString("zh-CN") + "（北京 " +
+    new Date(now.toLocaleString("en-US", { timeZone: "Asia/Shanghai" })).toLocaleTimeString("zh-CN") +
+    " / 美东 " + new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" })).toLocaleTimeString("zh-CN") + "）";
+}
+
+async function tick() {
+  try {
+    const res = await fetch("api/data");
+    const payload = await res.json();
+    if (payload.status === "ok") render(payload);
+    else document.getElementById("status").textContent = "数据预热中，稍候…";
+  } catch (e) {
+    document.getElementById("status").textContent = "请求失败：" + e.message;
+  }
+}
+
+chartSpcx = mkChart(document.getElementById("chart-spcx"), "SPCX", "#58a6ff", v => v == null ? "—" : "$" + v.toFixed(2));
+chartSenti = mkChart(document.getElementById("chart-senti"), "情绪", "#d29922", v => v == null ? "—" : "情绪 " + v.toFixed(1), { min: 0, max: 100 });
+tick();
+setInterval(tick, 15000);
+</script>
+</body>
+</html>
