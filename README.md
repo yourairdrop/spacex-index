@@ -1,3 +1,53 @@
+# SpaceX Index Dashboard · SPCX Index Dashboard
+
+English | [中文](#中文)
+
+A real-time monitoring dashboard built around the SpaceX IPO (Nasdaq ticker **SPCX**): it aggregates stocks associated with SpaceX, infers market sentiment from proxy tickers, estimates a model fair value, and quantifies its AI-compute narrative.
+
+> ⚠️ For research only, not investment advice. Quotes have roughly a 1–4 second delay, and some fundamentals are manually maintained static numbers.
+
+## Features
+
+- **Real-time quotes** — collects 20+ associated tickers via the Yahoo v8 endpoint (roughly 1–4 second delay), recording only during trading sessions
+- **Associated-ticker grouping**
+  - *Equity-linked* — direct/indirect holders of SpaceX equity (GOOGL, DXYZ, NASA, XOVR, RONB, VCX)
+  - *Compute supply chain* — Colossus supercomputer suppliers (NVDA, DELL, SMCI, TSLA, VRT, AVGO)
+  - *Compute competitors* — rivals SpaceX rents out compute to (CRWV, NBIS)
+  - *Sentiment basket* — space-sector halo trades (ASTS, RKLB, RDW, SATS, SPCE, LUNR, PL)
+- **Composite sentiment index (0–100)** — DXYZ premium-to-NAV z-score + space-basket beta-stripped residual z-score + proxy-fund volume z-score, composited through a normal CDF
+- **Model fair value** — anchored to the IPO price talk, layered with market beta and sector excess, to judge over/undervaluation independently of the actual traded price
+- **Compute-narrative quantification** — annualized signed compute contracts vs. segment revenue, real-time P/S
+- **Interactive charts** — scroll to zoom / drag to pan, intraday history backfill + real-time sampling, showing only trading sessions
+
+## Tech Stack
+
+Python + Flask (backend collection / API) · yfinance (daily history) · Chart.js (frontend charts) · SQLite (time-series snapshots)
+
+## Running
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install yfinance flask
+.venv/bin/python app.py
+# Open http://localhost:8500
+```
+
+## Structure
+
+| File | Purpose |
+|------|------|
+| `engine.py` | Metrics computation engine: quote collection, sentiment index, fair-value model, intraday backfill, fundamentals config (top-of-file constants) |
+| `app.py` | Flask server + background collection thread + SQLite snapshots + after-hours filtering |
+| `static/index.html` | Frontend (cards, charts, tables, compute-narrative module) |
+
+## Data Sources & Maintenance
+
+Quotes come from Yahoo Finance public endpoints and update automatically. Some fundamentals numbers (fund NAV, each fund's SpaceX exposure, SpaceX segment revenue, compute contracts) are manually maintained static config, centralized in the top-of-file constants of `engine.py`, and need to be updated after new earnings/new contracts.
+
+---
+
+<a name="中文"></a>
+
 # SpaceX 指标面板 · SPCX Index Dashboard
 
 围绕 SpaceX IPO（纳斯达克代码 **SPCX**）的实时监控面板：聚合与 SpaceX 关联的股票、用代理标的反推市场情绪、估算模型合理价，并量化其 AI 算力叙事。
