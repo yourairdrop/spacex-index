@@ -18,6 +18,7 @@ A real-time monitoring dashboard built around the SpaceX IPO (Nasdaq ticker **SP
 - **Model fair value** — anchored to the IPO price talk, layered with market beta and sector excess, to judge over/undervaluation independently of the actual traded price
 - **Compute-narrative quantification** — annualized signed compute contracts vs. segment revenue, real-time P/S
 - **Interactive charts** — scroll to zoom / drag to pan, intraday history backfill + real-time sampling, showing only trading sessions
+- **Bilingual UI** — one-click 中文/English toggle in the top-right corner (covers table link-reasons and methodology notes); choice persists locally
 
 ## Tech Stack
 
