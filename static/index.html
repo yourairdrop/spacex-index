@@ -16,7 +16,11 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text);
          font: 14px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; padding: 20px; }
-  h1 { font-size: 20px; margin-bottom: 4px; }
+  .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  h1 { font-size: 20px; }
+  .lang-btn { background: #1c2330; border: 1px solid var(--border); color: var(--text);
+              font-size: 13px; padding: 5px 14px; border-radius: 6px; cursor: pointer; }
+  .lang-btn:hover { border-color: var(--accent); color: var(--accent); }
   .sub { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
@@ -35,6 +39,7 @@
   .narrative { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
   .nar-head { font-size: 14px; color: var(--text); font-weight: 600; margin-bottom: 12px; }
   .nar-head span { color: var(--muted); font-weight: 400; font-size: 11px; }
+  .nar-head span[data-i18n] { color: var(--text); font-weight: 600; font-size: 14px; }
   .nar-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 22px; }
   @media (max-width: 900px) { .nar-grid { grid-template-columns: 1fr; } }
   .nar-bar-label { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
@@ -59,36 +64,39 @@
 </style>
 </head>
 <body>
-<h1>🚀 SpaceX 指标 · 实时面板</h1>
-<div class="sub">SPCX 上市日 2026-06-12 · 数据源 Yahoo 实时端点 · <span id="delay">行情延迟 —</span> · 每15秒自动刷新 · <span id="status">加载中…</span></div>
+<div class="head">
+  <h1 data-i18n="h1">🚀 SpaceX 指标 · 实时面板</h1>
+  <button id="lang-btn" class="lang-btn" onclick="toggleLang()">EN</button>
+</div>
+<div class="sub"><span data-i18n="subPrefix"></span> · <span id="delay">—</span> · <span data-i18n="refresh"></span> · <span id="status"></span></div>
 
 <div class="cards">
-  <div class="card"><div class="label">SPCX 现价（IPO 价 $135）</div>
+  <div class="card"><div class="label" data-i18n="cardSpcx"></div>
     <div class="value" id="spcx-price">—</div><div class="extra" id="spcx-extra">—</div></div>
-  <div class="card"><div class="label">模型合理价（同业+大盘反推）</div>
+  <div class="card"><div class="label" data-i18n="cardFair"></div>
     <div class="value" id="fair-price">—</div><div class="extra" id="fair-extra">—</div></div>
-  <div class="card"><div class="label">综合情绪指标（0–100）</div>
+  <div class="card"><div class="label" data-i18n="cardSenti"></div>
     <div class="value" id="senti-score">—</div><div class="extra" id="senti-extra">—</div></div>
-  <div class="card"><div class="label">DXYZ 对 NAV 溢价</div>
+  <div class="card"><div class="label" data-i18n="cardDxyz"></div>
     <div class="value" id="dxyz-prem">—</div><div class="extra" id="dxyz-extra">—</div></div>
-  <div class="card"><div class="label">GOOGL 所持 SpaceX 价值（~5%）</div>
+  <div class="card"><div class="label" data-i18n="cardGoogl"></div>
     <div class="value" id="googl-stake">—</div><div class="extra" id="googl-extra">—</div></div>
-  <div class="card"><div class="label">情绪篮子 β剥离超额（今日）</div>
+  <div class="card"><div class="label" data-i18n="cardBasket"></div>
     <div class="value" id="basket-resid">—</div><div class="extra" id="basket-extra">—</div></div>
 </div>
 
 <div class="charts">
-  <div class="chart-box"><h3>SPCX 价格走势 <span class="zoom-hint">滚轮缩放 · 拖拽平移 · 仅交易时段</span><button class="zoom-reset" onclick="chartSpcx.resetZoom()">重置</button></h3><canvas id="chart-spcx"></canvas></div>
-  <div class="chart-box"><h3>综合情绪指标走势 <span class="zoom-hint">滚轮缩放 · 拖拽平移 · 仅交易时段</span><button class="zoom-reset" onclick="chartSenti.resetZoom()">重置</button></h3><canvas id="chart-senti"></canvas></div>
+  <div class="chart-box"><h3><span data-i18n="chartSpcxTitle"></span> <span class="zoom-hint" data-i18n="zoomHint"></span><button class="zoom-reset" data-i18n="reset" onclick="chartSpcx.resetZoom()"></button></h3><canvas id="chart-spcx"></canvas></div>
+  <div class="chart-box"><h3><span data-i18n="chartSentiTitle"></span> <span class="zoom-hint" data-i18n="zoomHint"></span><button class="zoom-reset" data-i18n="reset" onclick="chartSenti.resetZoom()"></button></h3><canvas id="chart-senti"></canvas></div>
 </div>
 
 <div class="narrative">
-  <div class="nar-head">算力叙事强度 · 基本面快照 <span id="nar-asof"></span></div>
+  <div class="nar-head"><span data-i18n="narHead"></span> <span id="nar-asof"></span></div>
   <div class="nar-grid">
     <div class="nar-left">
-      <div class="nar-bar-label">2025 实际收入 $18.7B（分部构成）</div>
+      <div class="nar-bar-label" id="nar-rev-label"></div>
       <div class="nar-bar" id="nar-bar-rev"></div>
-      <div class="nar-bar-label" id="nar-comp-label">已签算力合同（前瞻年化）</div>
+      <div class="nar-bar-label" id="nar-comp-label"></div>
       <div class="nar-bar" id="nar-bar-comp"></div>
       <div class="nar-legend" id="nar-legend"></div>
     </div>
@@ -97,25 +105,101 @@
 </div>
 
 <table id="tbl">
-  <thead><tr><th>代码</th><th>名称</th><th>现价</th><th>日涨跌</th><th>市值</th><th>SpaceX 敞口</th><th class="reason-col">绑定原因</th></tr></thead>
+  <thead><tr id="thead-row"></tr></thead>
   <tbody></tbody>
 </table>
 
-<div class="foot">
-  分组说明：<b>core</b>=SpaceX 本尊 · <b>holders</b>=持有 SpaceX 股权的代理（敞口为官方/媒体披露值，附截至日期）·
+<div class="foot" id="foot"></div>
+
+<script>
+const I18N = {
+  zh: {
+    title: "SpaceX 指标 · 实时面板",
+    h1: "🚀 SpaceX 指标 · 实时面板",
+    subPrefix: "SPCX 上市日 2026-06-12 · 数据源 Yahoo 实时端点",
+    refresh: "每15秒自动刷新",
+    loading: "加载中…", warming: "数据预热中，稍候…", reqFail: "请求失败：",
+    delayNone: "行情延迟 —", delayClosed: "休市 / 盘后",
+    delay: s => `行情延迟 ~${s}秒`,
+    cardSpcx: "SPCX 现价（IPO 价 $135）", cardFair: "模型合理价（同业+大盘反推）",
+    cardSenti: "综合情绪指标（0–100）", cardDxyz: "DXYZ 对 NAV 溢价",
+    cardGoogl: "GOOGL 所持 SpaceX 价值（~5%）", cardBasket: "情绪篮子 β剥离超额（今日）",
+    spcxExtra: (pct, mcap) => `较发行价 ${pct} · 市值 ${mcap}`,
+    fairExtra: (a, m, s) => `锚 IPO $${a} · 大盘 ${m} · 板块 ${s}`,
+    fairOver: v => ` · 现价高估 ${v}%`, fairUnder: v => ` · 现价低估 ${v}%`,
+    sentiExtra: (p, r, a) => `溢价${p} · 残差${r} · 关注${a}（高=过热）`,
+    dxyzExtra: (nav, asof, z) => `NAV $${nav}（${asof}）· ${z}`,
+    googlExtra: p => `占 Alphabet 市值 ${p}`,
+    basketExtra: z => `ASTS/RKLB/RDW/SATS/SPCE/LUNR/PL 剔除大盘后 · ${z}`,
+    chartSpcxTitle: "SPCX 价格走势", chartSentiTitle: "综合情绪指标走势",
+    zoomHint: "滚轮缩放 · 拖拽平移 · 仅交易时段", reset: "重置",
+    sentiTooltip: v => `情绪 ${v}`,
+    narHead: "算力叙事强度 · 基本面快照", narSrc: "· 来源 ",
+    narRev: v => `2025 实际收入 $${v}B（分部构成）`,
+    narComp: d => `已签算力合同（前瞻年化）· ${d}`,
+    narCompSeg: v => `$${v}B / 年`,
+    narLegendComp: "已签算力合同（年化）",
+    narStats: ["已签算力合同 ÷ 全公司2025收入", "已签算力合同 ÷ 2025 AI实际收入",
+               "AI/xAI 占2025收入（且经营亏 $6.4B）", "当前市销率 P/S（市值 ÷ 2025收入）"],
+    thead: ["代码", "名称", "现价", "日涨跌", "市值", "SpaceX 敞口", "绑定原因"],
+    groups: { core: "── SpaceX 本尊 ──", holders: "── 股权关联（持有 SpaceX）──",
+      compute: "── 算力供应链（Colossus 超算 + 太空数据中心）──",
+      compute_rival: "── 算力竞品（SpaceX 出租算力的对手）──",
+      basket: "── 情绪篮子（光环交易）──", ecosystem: "── 生态受益 ──", benchmark: "── 基准 ──" },
+    statusLine: (t, bj, et) => `更新于 ${t}（北京 ${bj} / 美东 ${et}）`,
+    foot: `分组说明：<b>core</b>=SpaceX 本尊 · <b>holders</b>=持有 SpaceX 股权的代理（敞口为官方/媒体披露值，附截至日期）·
   <b>compute</b>=算力供应链（GPU/服务器/储能/散热/芯片，仅展示不进情绪计算）· <b>compute_rival</b>=算力竞品（GPU 云）·
   <b>basket</b>=情绪篮子（不持股，纯光环交易）· <b>ecosystem</b>=生态受益 · <b>benchmark</b>=基准。<br>
   指标口径：综合情绪 = mean(DXYZ溢价z, 篮子β剥离残差z, 代理基金成交量z) 经正态CDF映射至0-100；
   DXYZ NAV $24.56（2026-03-31 披露，下次披露后需更新配置）。<br>
-  模型合理价 = IPO询价 $135 ×(1 + β_spcx·大盘涨跌 + 0.3·板块β剥离超额)，β_spcx 由篮子β向1收缩并封顶1.5；独立于 SPCX 实际成交价，用于判断高估/低估（含主观参数假设）。本面板仅供研究，不构成投资建议。
-</div>
+  模型合理价 = IPO询价 $135 ×(1 + β_spcx·大盘涨跌 + 0.3·板块β剥离超额)，β_spcx 由篮子β向1收缩并封顶1.5；独立于 SPCX 实际成交价，用于判断高估/低估（含主观参数假设）。本面板仅供研究，不构成投资建议。`,
+  },
+  en: {
+    title: "SpaceX Index · Live Dashboard",
+    h1: "🚀 SpaceX Index · Live Dashboard",
+    subPrefix: "SPCX listed 2026-06-12 · Yahoo real-time endpoint",
+    refresh: "auto-refresh 15s",
+    loading: "Loading…", warming: "Warming up, one moment…", reqFail: "Request failed: ",
+    delayNone: "Quote delay —", delayClosed: "Market closed / after-hours",
+    delay: s => `Quote delay ~${s}s`,
+    cardSpcx: "SPCX price (IPO $135)", cardFair: "Model fair value (peers + market)",
+    cardSenti: "Composite sentiment (0–100)", cardDxyz: "DXYZ premium to NAV",
+    cardGoogl: "GOOGL's SpaceX stake (~5%)", cardBasket: "Basket β-stripped excess (today)",
+    spcxExtra: (pct, mcap) => `vs IPO ${pct} · Mcap ${mcap}`,
+    fairExtra: (a, m, s) => `Anchor IPO $${a} · Market ${m} · Sector ${s}`,
+    fairOver: v => ` · price ${v}% above model`, fairUnder: v => ` · price ${v}% below model`,
+    sentiExtra: (p, r, a) => `Premium ${p} · Residual ${r} · Attention ${a} (high = frothy)`,
+    dxyzExtra: (nav, asof, z) => `NAV $${nav} (${asof}) · ${z}`,
+    googlExtra: p => `≈ ${p} of Alphabet's mcap`,
+    basketExtra: z => `ASTS/RKLB/RDW/SATS/SPCE/LUNR/PL net of market β · ${z}`,
+    chartSpcxTitle: "SPCX price", chartSentiTitle: "Composite sentiment",
+    zoomHint: "wheel zoom · drag pan · trading hours only", reset: "Reset",
+    sentiTooltip: v => `Sentiment ${v}`,
+    narHead: "AI-compute narrative · fundamentals snapshot", narSrc: "· source ",
+    narRev: v => `FY2025 actual revenue $${v}B (by segment)`,
+    narComp: d => `Signed compute contracts (annualized) · ${d}`,
+    narCompSeg: v => `$${v}B / yr`,
+    narLegendComp: "Signed compute contracts (annualized)",
+    narStats: ["Signed compute ÷ FY2025 total revenue", "Signed compute ÷ FY2025 AI revenue",
+               "AI/xAI share of FY2025 revenue (op. loss $6.4B)", "P/S (mcap ÷ FY2025 revenue)"],
+    thead: ["Ticker", "Name", "Price", "Chg", "Mcap", "SpaceX exposure", "Why it's linked"],
+    groups: { core: "── SpaceX itself ──", holders: "── Equity holders (own SpaceX) ──",
+      compute: "── Compute supply chain (Colossus + orbital DCs) ──",
+      compute_rival: "── Compute rivals (vs SpaceX leasing) ──",
+      basket: "── Sentiment basket (halo trades) ──", ecosystem: "── Ecosystem ──", benchmark: "── Benchmark ──" },
+    statusLine: (t, bj, et) => `Updated ${t} (Beijing ${bj} / ET ${et})`,
+    foot: `Groups: <b>core</b> = SpaceX itself · <b>holders</b> = proxies owning SpaceX equity (exposure per official/media disclosures, with as-of dates) ·
+  <b>compute</b> = compute supply chain (GPU / servers / storage / cooling / chips; display-only, excluded from sentiment) · <b>compute_rival</b> = compute rivals (GPU clouds) ·
+  <b>basket</b> = sentiment basket (no SpaceX equity, pure halo trades) · <b>ecosystem</b> = ecosystem beneficiaries · <b>benchmark</b> = benchmark.<br>
+  Methodology: composite sentiment = mean(DXYZ-premium z, basket β-stripped-residual z, proxy-fund volume z) mapped to 0–100 via normal CDF;
+  DXYZ NAV $24.56 (disclosed 2026-03-31; update config after next disclosure).<br>
+  Model fair value = IPO price $135 × (1 + β_spcx·market move + 0.3·sector β-stripped excess); β_spcx shrunk toward 1 and capped at 1.5. Independent of SPCX's actual price; used to gauge over/under-valuation (contains subjective parameters). Research only — not investment advice.`,
+  },
+};
 
-<script>
-const GROUP_NAMES = { core: "── SpaceX 本尊 ──", holders: "── 股权关联（持有 SpaceX）──",
-  compute: "── 算力供应链（Colossus 超算 + 太空数据中心）──",
-  compute_rival: "── 算力竞品（SpaceX 出租算力的对手）──",
-  basket: "── 情绪篮子（光环交易）──", ecosystem: "── 生态受益 ──", benchmark: "── 基准 ──" };
-
+let LANG = localStorage.getItem("spcx_lang") || "zh";
+const T = () => I18N[LANG];
+let lastPayload = null;
 let chartSpcx, chartSenti;
 
 function fmtPct(v, digits = 2) {
@@ -151,53 +235,54 @@ function mkChart(ctx, label, color, fmt, yOpts = {}) {
 }
 
 function renderNarrative(n) {
-  document.getElementById("nar-asof").textContent = "· 来源 " + n.asof;
+  const t = T();
+  document.getElementById("nar-asof").textContent = t.narSrc + n.asof;
   const colors = ["#3fb950", "#58a6ff", "#d29922"];
   const maxv = Math.max(n.revenue_total, n.compute_annualized);
+  document.getElementById("nar-rev-label").textContent = t.narRev(n.revenue_total);
   const revBar = document.getElementById("nar-bar-rev");
   revBar.style.width = (n.revenue_total / maxv * 100) + "%";
   revBar.innerHTML = n.segments.map((sg, i) =>
     `<div class="nar-seg" style="width:${sg.rev / n.revenue_total * 100}%;background:${colors[i]}">${sg.rev >= 3 ? "$" + sg.rev + "B" : ""}</div>`).join("");
   const compBar = document.getElementById("nar-bar-comp");
   compBar.style.width = (n.compute_annualized / maxv * 100) + "%";
-  compBar.innerHTML = `<div class="nar-seg" style="width:100%;background:#f85149">$${n.compute_annualized}B / 年</div>`;
-  document.getElementById("nar-comp-label").textContent =
-    `已签算力合同（前瞻年化）· ${n.compute_detail}`;
+  compBar.innerHTML = `<div class="nar-seg" style="width:100%;background:#f85149">${t.narCompSeg(n.compute_annualized)}</div>`;
+  document.getElementById("nar-comp-label").textContent = t.narComp(n.compute_detail);
   document.getElementById("nar-legend").innerHTML =
-    n.segments.map((sg, i) => `<span><i style="background:${colors[i]}"></i>${sg.name} $${sg.rev}B</span>`).join("") +
-    `<span><i style="background:#f85149"></i>已签算力合同（年化）</span>`;
-  document.getElementById("nar-stats").innerHTML = [
-    ["已签算力合同 ÷ 全公司2025收入", (n.compute_vs_total * 100).toFixed(0) + "%", "down"],
-    ["已签算力合同 ÷ 2025 AI实际收入", n.compute_vs_ai.toFixed(1) + "×", "down"],
-    ["AI/xAI 占2025收入（且经营亏 $6.4B）", (n.ai_share * 100).toFixed(0) + "%", "warn"],
-    ["当前市销率 P/S（市值 ÷ 2025收入）", n.ps_ratio ? n.ps_ratio.toFixed(0) + "×" : "—", "warn"],
-  ].map(([k, v, c]) => `<div class="nar-stat"><span class="k">${k}</span><span class="v ${c}">${v}</span></div>`).join("");
+    n.segments.map((sg, i) => `<span><i style="background:${colors[i]}"></i>${LANG === "en" ? (sg.name_en || sg.name) : sg.name} $${sg.rev}B</span>`).join("") +
+    `<span><i style="background:#f85149"></i>${t.narLegendComp}</span>`;
+  const vals = [(n.compute_vs_total * 100).toFixed(0) + "%", n.compute_vs_ai.toFixed(1) + "×",
+                (n.ai_share * 100).toFixed(0) + "%", n.ps_ratio ? n.ps_ratio.toFixed(0) + "×" : "—"];
+  const cls = ["down", "down", "warn", "warn"];
+  document.getElementById("nar-stats").innerHTML = t.narStats.map((k, i) =>
+    `<div class="nar-stat"><span class="k">${k}</span><span class="v ${cls[i]}">${vals[i]}</span></div>`).join("");
 }
 
 function render(payload) {
+  lastPayload = payload;
+  const t = T();
   const d = payload.data, s = payload.series;
   if (d.narrative) renderNarrative(d.narrative);
 
   const dd = d.data_delay_sec;
   const delayEl = document.getElementById("delay");
-  if (dd == null) { delayEl.textContent = "行情延迟 —"; delayEl.className = "warn"; }
-  else if (dd < 0 || dd > 300) { delayEl.textContent = "休市 / 盘后"; delayEl.className = "warn"; }
-  else { delayEl.textContent = `行情延迟 ~${dd}秒`; delayEl.className = dd < 60 ? "up" : "warn"; }
+  if (dd == null) { delayEl.textContent = t.delayNone; delayEl.className = "warn"; }
+  else if (dd < 0 || dd > 300) { delayEl.textContent = t.delayClosed; delayEl.className = "warn"; }
+  else { delayEl.textContent = t.delay(dd); delayEl.className = dd < 60 ? "up" : "warn"; }
 
   const spcx = d.spcx;
   document.getElementById("spcx-price").textContent = spcx.last ? "$" + spcx.last.toFixed(2) : "—";
   document.getElementById("spcx-price").className = "value " + pctClass(spcx.vs_ipo);
-  document.getElementById("spcx-extra").textContent =
-    "较发行价 " + fmtPct(spcx.vs_ipo) + " · 市值 " + fmtMcap(spcx.mcap);
+  document.getElementById("spcx-extra").textContent = t.spcxExtra(fmtPct(spcx.vs_ipo), fmtMcap(spcx.mcap));
 
   const fv = d.fair_value;
   const fairEl = document.getElementById("fair-price");
   fairEl.textContent = fv && fv.price ? "$" + fv.price.toFixed(2) : "—";
-  const vs = fv ? fv.vs_last : null;  // 现价 ÷ 合理价 − 1：>0 高估，<0 低估
+  const vs = fv ? fv.vs_last : null;
   fairEl.className = "value " + (vs == null ? "" : vs > 0.05 ? "down" : vs < -0.05 ? "up" : "warn");
   document.getElementById("fair-extra").textContent = fv
-    ? `锚 IPO $${fv.anchor} · 大盘 ${fmtPct(fv.mkt_contrib)} · 板块 ${fmtPct(fv.sector_contrib)}` +
-      (vs != null ? ` · 现价${vs > 0 ? "高估" : "低估"} ${Math.abs(vs * 100).toFixed(0)}%` : "")
+    ? t.fairExtra(fv.anchor, fmtPct(fv.mkt_contrib), fmtPct(fv.sector_contrib)) +
+      (vs != null ? (vs > 0 ? t.fairOver(Math.abs(vs * 100).toFixed(0)) : t.fairUnder(Math.abs(vs * 100).toFixed(0))) : "")
     : "—";
 
   const sc = d.sentiment.score;
@@ -206,24 +291,20 @@ function render(payload) {
   el.className = "value " + (sc === null ? "" : sc >= 70 ? "down" : sc <= 30 ? "up" : "warn");
   const c = d.sentiment.components;
   document.getElementById("senti-extra").textContent =
-    `溢价${fmtZ(c.premium_z)} · 残差${fmtZ(c.basket_residual_z)} · 关注${fmtZ(c.attention_z)}（高=过热）`;
+    t.sentiExtra(fmtZ(c.premium_z), fmtZ(c.basket_residual_z), fmtZ(c.attention_z));
 
   document.getElementById("dxyz-prem").textContent = fmtPct(d.dxyz.premium, 1);
   document.getElementById("dxyz-prem").className = "value " + (d.dxyz.premium > 0.5 ? "down" : "warn");
-  document.getElementById("dxyz-extra").textContent =
-    `NAV $${d.dxyz.nav}（${d.dxyz.nav_asof}）· ${fmtZ(d.dxyz.premium_z)}`;
+  document.getElementById("dxyz-extra").textContent = t.dxyzExtra(d.dxyz.nav, d.dxyz.nav_asof, fmtZ(d.dxyz.premium_z));
 
   document.getElementById("googl-stake").textContent = fmtMcap(d.googl.stake_value);
-  document.getElementById("googl-extra").textContent =
-    "占 Alphabet 市值 " + fmtPct(d.googl.pct_of_googl, 1);
+  document.getElementById("googl-extra").textContent = t.googlExtra(fmtPct(d.googl.pct_of_googl, 1));
 
   const br = d.basket.residual_today;
   document.getElementById("basket-resid").textContent = fmtPct(br);
   document.getElementById("basket-resid").className = "value " + pctClass(br);
-  document.getElementById("basket-extra").textContent =
-    "ASTS/RKLB/RDW/SATS/SPCE/LUNR/PL 剔除大盘后 · " + fmtZ(d.basket.residual_z);
+  document.getElementById("basket-extra").textContent = t.basketExtra(fmtZ(d.basket.residual_z));
 
-  // 表格
   const tbody = document.querySelector("#tbl tbody");
   tbody.innerHTML = "";
   let lastGroup = null;
@@ -232,29 +313,29 @@ function render(payload) {
       lastGroup = row.group;
       const tr = document.createElement("tr");
       tr.className = "group-row";
-      tr.innerHTML = `<td colspan="7">${GROUP_NAMES[row.group] || row.group}</td>`;
+      tr.innerHTML = `<td colspan="7">${t.groups[row.group] || row.group}</td>`;
       tbody.appendChild(tr);
     }
+    const note = LANG === "en" ? (row.exposure_note_en || row.exposure_note) : row.exposure_note;
     const exp = row.exposure_pct !== null && row.exposure_pct !== undefined
       ? (row.exposure_pct * 100).toFixed(1) + "%" + (row.exposure_asof ? ` (${row.exposure_asof})` : "")
-      : (row.exposure_note || "—");
+      : (note || "—");
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td><b>${row.ticker}</b></td><td>${row.name}</td>
+    tr.innerHTML = `<td><b>${row.ticker}</b></td><td>${LANG === "en" ? (row.name_en || row.name) : row.name}</td>
       <td>${row.last ? "$" + row.last.toFixed(2) : "—"}</td>
       <td class="${pctClass(row.chg)}">${fmtPct(row.chg)}</td>
       <td>${fmtMcap(row.mcap)}</td>
-      <td title="${row.exposure_note || ""}">${exp}</td>
-      <td class="reason">${row.bind_reason || "—"}</td>`;
+      <td title="${note || ""}">${exp}</td>
+      <td class="reason">${(LANG === "en" ? (row.bind_reason_en || row.bind_reason) : row.bind_reason) || "—"}</td>`;
     tbody.appendChild(tr);
   }
 
-  // 图表
-  const labels = s.ts.map(t => {
-    const dt = new Date(t * 1000);
+  const labels = s.ts.map(ts => {
+    const dt = new Date(ts * 1000);
     return (dt.getMonth() + 1) + "/" + dt.getDate() + " " +
       dt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
   });
-  const spcxStart = Math.max(0, s.spcx.findIndex(v => v != null));  // 跳过上市前的空段
+  const spcxStart = Math.max(0, s.spcx.findIndex(v => v != null));
   chartSpcx.data.labels = labels.slice(spcxStart);
   chartSpcx.data.datasets[0].data = s.spcx.slice(spcxStart);
   chartSpcx.update();
@@ -263,10 +344,33 @@ function render(payload) {
   chartSenti.update();
 
   const now = new Date();
-  document.getElementById("status").textContent =
-    "更新于 " + now.toLocaleTimeString("zh-CN") + "（北京 " +
-    new Date(now.toLocaleString("en-US", { timeZone: "Asia/Shanghai" })).toLocaleTimeString("zh-CN") +
-    " / 美东 " + new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" })).toLocaleTimeString("zh-CN") + "）";
+  const loc = LANG === "en" ? "en-US" : "zh-CN";
+  document.getElementById("status").textContent = t.statusLine(
+    now.toLocaleTimeString(loc),
+    new Date(now.toLocaleString("en-US", { timeZone: "Asia/Shanghai" })).toLocaleTimeString(loc),
+    new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" })).toLocaleTimeString(loc));
+}
+
+function applyLang() {
+  const t = T();
+  document.documentElement.lang = LANG === "zh" ? "zh-CN" : "en";
+  document.title = t.title;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const v = t[el.dataset.i18n];
+    if (typeof v === "string") el.textContent = v;
+  });
+  document.getElementById("thead-row").innerHTML =
+    t.thead.map((h, i) => `<th${i === 6 ? ' class="reason-col"' : ""}>${h}</th>`).join("");
+  document.getElementById("foot").innerHTML = t.foot;
+  document.getElementById("lang-btn").textContent = LANG === "zh" ? "EN" : "中文";
+  if (lastPayload) render(lastPayload);
+  else document.getElementById("status").textContent = t.loading;
+}
+
+function toggleLang() {
+  LANG = LANG === "zh" ? "en" : "zh";
+  localStorage.setItem("spcx_lang", LANG);
+  applyLang();
 }
 
 async function tick() {
@@ -274,14 +378,15 @@ async function tick() {
     const res = await fetch("api/data");
     const payload = await res.json();
     if (payload.status === "ok") render(payload);
-    else document.getElementById("status").textContent = "数据预热中，稍候…";
+    else document.getElementById("status").textContent = T().warming;
   } catch (e) {
-    document.getElementById("status").textContent = "请求失败：" + e.message;
+    document.getElementById("status").textContent = T().reqFail + e.message;
   }
 }
 
 chartSpcx = mkChart(document.getElementById("chart-spcx"), "SPCX", "#58a6ff", v => v == null ? "—" : "$" + v.toFixed(2));
-chartSenti = mkChart(document.getElementById("chart-senti"), "情绪", "#d29922", v => v == null ? "—" : "情绪 " + v.toFixed(1), { min: 0, max: 100 });
+chartSenti = mkChart(document.getElementById("chart-senti"), "情绪", "#d29922", v => v == null ? "—" : T().sentiTooltip(v.toFixed(1)), { min: 0, max: 100 });
+applyLang();
 tick();
 setInterval(tick, 15000);
 </script>

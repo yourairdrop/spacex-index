@@ -72,6 +72,10 @@ def _seed_backfill(hist):
             row = conn.execute("SELECT MIN(ts) FROM snapshots WHERE payload != ''").fetchone()
             earliest_rt = row[0] if row and row[0] else None
             conn.execute("DELETE FROM snapshots WHERE payload = ''")
+            # 瘦身：8 天前的实时点只留指标列，payload 置 '{}'（非空，保住实时标记）
+            conn.execute("UPDATE snapshots SET payload='{}' "
+                         "WHERE payload NOT IN ('', '{}') AND ts < ?",
+                         (int(time.time()) - 8 * 86400,))
             for r in rows:
                 if r["sentiment"] is None:
                     continue

@@ -66,6 +66,7 @@ Quotes come from Yahoo Finance public endpoints and update automatically. Some f
 - **模型合理价** — 以 IPO 询价为锚，叠加大盘 β 与板块超额，独立于实际成交价判断高估/低估
 - **算力叙事量化** — 已签算力合同年化 vs 分部收入，实时 P/S
 - **交互图表** — 滚轮缩放 / 拖拽平移，intraday 历史回算 + 实时采样，仅显示交易时段
+- **中英双语** — 右上角按钮一键切换（含表格绑定原因、指标口径说明），选择保存在本地
 
 ## 技术栈
 

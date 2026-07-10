@@ -22,11 +22,16 @@ DXYZ_NAV = 24.56               # 2026-03-31 官方披露 NAV/股
 DXYZ_NAV_ASOF = "2026-03-31"
 
 EXPOSURES = {  # SpaceX 占基金组合比例（披露值）
-    "NASA": {"pct": 0.133, "asof": "2026-06-05", "note": "Tema Space Innovators，公开ETF中最高"},
-    "XOVR": {"pct": None, "asof": "2026-05-21", "note": "经 SPV 持有约 $2.92 亿 SpaceX"},
-    "RONB": {"pct": 0.02, "asof": "2026-05", "note": "Baron First Principles"},
-    "DXYZ": {"pct": 0.162, "asof": "2026-03-31", "note": "封闭式基金，第一大持仓"},
-    "VCX":  {"pct": None, "asof": None, "note": "SpaceX/Anthropic 未上市股权代理"},
+    "NASA": {"pct": 0.1765, "asof": "2026-07-09", "note": "Tema Space Innovators，公开ETF中最高",
+             "note_en": "Tema Space Innovators, highest among public ETFs"},
+    "XOVR": {"pct": None, "asof": "2026-05-21", "note": "经 SPV 持有约 $2.92 亿 SpaceX",
+             "note_en": "~$292M SpaceX via SPV"},
+    "RONB": {"pct": 0.02, "asof": "2026-05", "note": "Baron First Principles",
+             "note_en": "Baron First Principles"},
+    "DXYZ": {"pct": 0.162, "asof": "2026-03-31", "note": "封闭式基金，第一大持仓",
+             "note_en": "Closed-end fund, top holding"},
+    "VCX":  {"pct": None, "asof": None, "note": "SpaceX/Anthropic 未上市股权代理",
+             "note_en": "Pre-IPO SpaceX/Anthropic proxy"},
 }
 
 GROUPS = {
@@ -51,9 +56,20 @@ NAMES = {
     "TSLA": "特斯拉", "VRT": "Vertiv", "AVGO": "博通", "NBIS": "Nebius",
 }
 
+NAMES_EN = {
+    "SPCX": "SpaceX", "GOOGL": "Alphabet", "NASA": "Tema Space ETF",
+    "XOVR": "ERShares Crossover", "RONB": "Baron First Principles",
+    "DXYZ": "Destiny Tech100", "VCX": "VCX pre-IPO proxy",
+    "ASTS": "AST SpaceMobile", "RKLB": "Rocket Lab", "RDW": "Redwire",
+    "SATS": "EchoStar", "SPCE": "Virgin Galactic", "LUNR": "Intuitive Machines",
+    "PL": "Planet Labs", "HOOD": "Robinhood", "SPY": "S&P 500 ETF",
+    "NVDA": "NVIDIA", "CRWV": "CoreWeave", "DELL": "Dell", "SMCI": "Supermicro",
+    "TSLA": "Tesla", "VRT": "Vertiv", "AVGO": "Broadcom", "NBIS": "Nebius",
+}
+
 # 各标的与 SpaceX 的绑定原因（持股比例已核实，篮子归类源自媒体 sympathy-plays 报道）
 BIND_REASON = {
-    "SPCX": "SpaceX 本尊，今日纳斯达克挂牌（与 xAI 合并后兼具 AI 属性）",
+    "SPCX": "SpaceX 本尊，2026-06-12 纳斯达克上市（与 xAI 合并后兼具 AI 属性）；7/7 已纳入纳斯达克100",
     "GOOGL": "双重绑定：① 2015 年起持股约 5%（IPO 后值 $1000 亿+）；② 每月 $9.2 亿 ×32 月租用 SpaceX/xAI 算力（既是股东又是大客户）",
     "NASA": "Tema 太空 ETF，约 13.3% 仓位为 SpaceX，公开 ETF 中持仓最高",
     "XOVR": "ERShares，经 SPV 持有约 $2.9 亿 SpaceX 未上市股权",
@@ -79,6 +95,33 @@ BIND_REASON = {
     "SPY": "标普 500 ETF，仅作大盘基准（用于剥离 β），本身不绑定 SpaceX",
 }
 
+BIND_REASON_EN = {
+    "SPCX": "SpaceX itself — Nasdaq debut 2026-06-12 (also an AI company post-xAI merger); joined the Nasdaq-100 on Jul 7",
+    "GOOGL": "Dual link: ① ~5% equity stake since 2015 (worth $100B+ post-IPO); ② $920M/mo × 32-month compute rental — both shareholder and major customer",
+    "NASA": "Tema Space Innovators ETF, ~17.7% in SpaceX — largest allocation among public ETFs",
+    "XOVR": "ERShares ETF, holds ~$292M of SpaceX via an SPV",
+    "RONB": "Baron fund, ~2% in SpaceX (top holding is Tesla)",
+    "DXYZ": "Closed-end fund, ~16.2% in SpaceX as top holding — hence its persistent premium to NAV",
+    "VCX": "Proxy fund holding pre-IPO stakes in SpaceX / Anthropic",
+    "ASTS": "Direct-to-cell satellites launched on Falcon 9; traded as a SpaceX sentiment outlet",
+    "RKLB": "Rocket launch company, viewed as a 'mini SpaceX' — sector leader",
+    "RDW": "Redwire, space-infrastructure supplier; sector sympathy play",
+    "SATS": "EchoStar satellite comms, co-opetition with Starlink; sympathy-linked",
+    "SPCE": "Virgin Galactic space tourism — pure halo trade (weak fundamentals)",
+    "LUNR": "Intuitive Machines lunar landers, NASA contractor; sector-linked",
+    "PL": "Planet Labs Earth-imaging satellites; sector-linked",
+    "HOOD": "Robinhood won IPO underwriting — the main retail on-ramp for SPCX flow",
+    "NVDA": "Colossus runs ~230K NVIDIA GPUs (150K H100 + 50K H200 + 30K GB200), scaling toward 1M+ — the core GPU supplier",
+    "DELL": "Supplies about half of Colossus server racks (PowerEdge XE9680, optimized for NVIDIA HGX)",
+    "SMCI": "Supplies the other half — liquid-cooled racks (Supermicro's specialty)",
+    "TSLA": "xAI powers Colossus with Tesla Megapacks (fresh $269M purchase per the S-1); Musk-ecosystem synergy",
+    "VRT": "Liquid-cooling / power-distribution leader for AI data centers — industry linkage",
+    "AVGO": "xAI sits in Broadcom's custom AI-chip (XPU) pipeline; also supplies cluster networking silicon",
+    "CRWV": "GPU-cloud leader; SpaceX renting out Colossus (Google/Anthropic as clients) competes head-on (rival)",
+    "NBIS": "GPU-cloud peer (neocloud); pressured by SpaceX entering compute leasing (rival)",
+    "SPY": "S&P 500 ETF — market benchmark for beta-stripping only; no SpaceX link",
+}
+
 # ---- SpaceX 基本面（S1 招股书 2026-05-20 披露 FY2025；算力合同来自公开新闻）----
 # 静态数据，新财报 / 新合同后需人工更新
 FUNDAMENTALS = {
@@ -91,6 +134,7 @@ FUNDAMENTALS = {
     "compute_contracts": [    # 已签算力合同（前瞻年化）
         {"name": "Google", "monthly_b": 0.92, "until": "2029-06"},
         {"name": "Anthropic", "monthly_b": 1.25, "until": "2029-05"},
+        {"name": "Reflection AI", "monthly_b": 0.15, "until": "2029"},  # 2026-06-22 签约，7/1 起 Colossus 2/GB300
     ],
 }
 
@@ -114,14 +158,14 @@ def _narrative(spcx_mcap):
         "asof": F["asof"],
         "revenue_total": F["revenue_total"],
         "segments": [
-            {"name": "Starlink", "rev": F["seg_starlink"]},
-            {"name": "发射", "rev": F["seg_launch"]},
-            {"name": "AI / xAI", "rev": F["seg_ai"]},
+            {"name": "Starlink", "name_en": "Starlink", "rev": F["seg_starlink"]},
+            {"name": "发射", "name_en": "Launch", "rev": F["seg_launch"]},
+            {"name": "AI / xAI", "name_en": "AI / xAI", "rev": F["seg_ai"]},
         ],
         "ai_op_loss": F["ai_op_loss"],
         "compute_annualized": round(comp_ann, 1),
         "compute_detail": " + ".join(
-            f'{c["name"]} ${round(c["monthly_b"] * 12)}B' for c in F["compute_contracts"]),
+            f'{c["name"]} ${round(c["monthly_b"] * 12, 1):g}B' for c in F["compute_contracts"]),
         "compute_vs_total": comp_ann / F["revenue_total"],     # 算力合同 / 2025总收入
         "compute_vs_ai": comp_ann / F["seg_ai"],               # 算力合同 / 2025 AI实际收入
         "ai_share": F["seg_ai"] / F["revenue_total"],          # AI 占 2025 收入
@@ -270,11 +314,14 @@ def compute(quotes: dict, hist: dict) -> dict:
             q = quotes.get(t) or {}
             exp = EXPOSURES.get(t, {})
             table.append({
-                "ticker": t, "name": NAMES.get(t, t), "group": group,
+                "ticker": t, "name": NAMES.get(t, t), "name_en": NAMES_EN.get(t, t),
+                "group": group,
                 "last": q.get("last"), "chg": q.get("chg"), "mcap": q.get("mcap"),
                 "exposure_pct": exp.get("pct"), "exposure_note": exp.get("note"),
+                "exposure_note_en": exp.get("note_en"),
                 "exposure_asof": exp.get("asof"), "error": q.get("error"),
                 "bind_reason": BIND_REASON.get(t, ""),
+                "bind_reason_en": BIND_REASON_EN.get(t, ""),
             })
 
     return {
